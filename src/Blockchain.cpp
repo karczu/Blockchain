@@ -14,85 +14,23 @@
 
 #include <vector>
 
-
-
-class Block{
-private:
-	int index;
-	size_t blockHash;
-	size_t previousHash;
-	size_t generateHash();
-
-
-public:
-	Block(int idx, TransactionData d, size_t prevHash);
-
-	//get original hash
-	size_t getHash();
-	//get previous hash
-	size_t getPreviousHash();
-	//transaction data
-	TransactionData data;
-	//validate hash
-	bool isHashValid();
-	int getIndex();
-
-};
-
-//constructor
-Block::Block(int idx, TransactionData d, size_t prevHash){
-	index = idx;
-	data = d;
-	previousHash = prevHash;
-	blockHash = generateHash();
-}
-
-int Block::getIndex()
-{
-    return index;
-}
-
-//private fct
-size_t Block::generateHash(){
-	std::hash<std::string> hash1;
-	std::hash<size_t> hash2;
-	std::hash<size_t> finalHash;
-
-	std::string toHash = std::to_string(data.amount) + data.receiverKey + data.senderKey + std::to_string(data.timestamp);
-
-	return finalHash(hash1(toHash)+hash2(previousHash));
-}
-
-//public fct
-size_t Block::getHash(){
-	return blockHash;
-}
-size_t Block::getPreviousHash(){
-	return previousHash;
-}
-bool Block::isHashValid(){
-	return generateHash() == blockHash;
-}
-
-
-
-
 //constructor
 Blockchain::Blockchain(){
 	Block genesis = createGenesisBlock();
 	chain.push_back(genesis);
 }
 
-Block Blockchain::createGenesisBlock(){
-	time_t current_time;
-	TransactionData d;
-	d.amount = 0;
-	d.receiverKey = "None";
-	d.senderKey = "None";
-	d.timestamp = time(&current_time);
+std::vector<Block> Blockchain::getChain(){
+	return chain;
+}
 
-	std::hash<int> hash1;
-	Block genesis(0, d, hash1(0));
+Block Blockchain::createGenesisBlock(){
+	//current time
+	time_t current_time;
+	//initial data
+	TransactionData d(0,"Genesis","Genesis",time(&current_time));
+
+	Block genesis(0, d, 0);
 	return genesis;
 }
 
@@ -101,13 +39,35 @@ Block *Blockchain::getLatestBlock(){
 }
 
 void Blockchain::addBlock(TransactionData d){
-	int index = (int)chain.size() -1;
-	Block newBlock(index, d, getLatestBlock()->getHash());
+	int index = (int)chain.size();
+	std::size_t previousHash = (int)chain.size() > 0 ? getLatestBlock()->getHash() : 0;
+	Block newBlock(index, d, previousHash);
 	chain.push_back(newBlock);
 }
 
 int Blockchain::numberOfBlocks(){
 	return (int)chain.size();
+}
+
+
+bool Blockchain::isChainValid(){
+	std::vector<Block>::iterator i;
+	int chainLen = (int)chain.size();
+
+	for (i = chain.begin(); i != chain.end(); ++i){
+		Block currentBlock = *i;
+		if (!currentBlock.isHashValid()){
+			return false;
+		}
+
+		if(i!=chain.begin()){
+			Block previousBlock = *(i-1);
+			if (currentBlock.getPreviousHash() != previousBlock.getHash()){
+				return false;
+			}
+		}
+	}
+	return true;
 }
 
 void Blockchain::printChain() {
@@ -127,29 +87,6 @@ void Blockchain::printChain() {
         printf("\nIs Block Valid?: %d", currentBlock.isHashValid());
     }
 }
-
-
-bool Blockchain::isChainValid(){
-	std::vector<Block>::iterator i;
-	int chainLen = (int)chain.size();
-
-	for (i = chain.begin(); i != chain.end(); ++i){
-		Block currentBlock = *i;
-		if (!currentBlock.isHashValid()){
-			return false;
-		}
-
-		if(chainLen>1){
-			Block previousBlock = *(i-1);
-			if (currentBlock.getPreviousHash() != previousBlock.getHash()){
-				return false;
-			}
-		}
-	}
-	return true;
-}
-
-
 
 
 

@@ -4,13 +4,19 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 CPP_SRCS += \
-../src/Blockchain.cpp 
+../src/Block.cpp \
+../src/Blockchain.cpp \
+../src/main.cpp 
 
 OBJS += \
-./src/Blockchain.o 
+./src/Block.o \
+./src/Blockchain.o \
+./src/main.o 
 
 CPP_DEPS += \
-./src/Blockchain.d 
+./src/Block.d \
+./src/Blockchain.d \
+./src/main.d 
 
 
 # Each subdirectory must supply rules for building sources it contributes
