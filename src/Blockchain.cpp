@@ -1,10 +1,9 @@
-//============================================================================
-// Name        : Blockchain.cpp
-// Author      : oski
-// Version     :
-// Copyright   : yes no
-// Description : blockchain project
-//============================================================================
+/*
+ * Blockchain.cpp
+ *
+ *  Created on: Nov 18, 2020
+ *      Author: oski
+ */
 
 #include <iostream>
 #include <ctime>
